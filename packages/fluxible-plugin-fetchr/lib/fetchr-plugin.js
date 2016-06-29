@@ -59,14 +59,20 @@ module.exports = function fetchrPlugin(options) {
                 plugActionContext: function plugActionContext(actionContext) {
                     var uri;
 
-                    var service = new Fetchr({
+                    var fetchrOptions = {
                         req: contextOptions.req,
                         xhrPath: xhrPath,
                         xhrTimeout: xhrTimeout,
                         corsPath: corsPath,
                         context: xhrContext,
                         contextPicker: options.contextPicker
-                    });
+                    };
+                    if (typeof options.statsCollector === 'function') {
+                        fetchrOptions.statsCollector = function collectFetcherStats(stats) {
+                            options.statsCollector(actionContext, stats);
+                        };
+                    }
+                    var service = new Fetchr(fetchrOptions);
                     actionContext.service = {
                         create: service.create.bind(service),
                         read: service.read.bind(service),
